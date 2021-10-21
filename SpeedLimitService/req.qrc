@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Assets/Sounds/bell-ringing-04.wav</file>
+    </qresource>
+</RCC>

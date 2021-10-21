@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <manifest package="ru.pavelk.SpeedLimitNotifier" xmlns:android="http://schemas.android.com/apk/res/android" android:versionName="-- %%INSERT_VERSION_NAME%% --" android:versionCode="-- %%INSERT_VERSION_CODE%% --" android:installLocation="auto">
-    <uses-sdk android:minSdkVersion="22" android:targetSdkVersion="28"/>
+    <uses-sdk android:minSdkVersion="26" android:targetSdkVersion="28"/>
 
     <!-- The following comment will be replaced upon deployment with default permissions based on the dependencies of the application.
          Remove the comment if you do not require these default permissions. -->
@@ -75,11 +75,7 @@
             <!-- extract android style -->
         </activity>
         <!-- For adding service(s) please check: https://wiki.qt.io/AndroidServices -->
-        <!-- Название сервиса как название пакета и через точку класс активности, название процесса сервиса по вкусу -->
         <service android:name="ru.pavelk.SpeedLimitNotifier.SpeedLimitNotifierService" android:process=":SpeedLimitNotifierService">
-            <!-- Имя библиотеки сервиса, т.е. значение TARGET из pro файла сервиса -->
-            <meta-data android:name="android.app.lib_name" android:value="SpeedLimitService"/>
-            <!-- Что бы мог запускаться в фоне -->
             <meta-data android:name="android.app.background_running" android:value="true"/>
             <!-- Библиотеки Qt, можно скопировать из основной activity, которая выше в файле -->
             <meta-data android:name="android.app.qt_sources_resource_id" android:resource="@array/qt_sources"/>
@@ -102,8 +98,19 @@
             <meta-data android:value="@string/ministro_not_found_msg" android:name="android.app.ministro_not_found_msg"/>
             <meta-data android:value="@string/ministro_needed_msg" android:name="android.app.ministro_needed_msg"/>
             <meta-data android:value="@string/fatal_error_msg" android:name="android.app.fatal_error_msg"/>
-            <meta-data android:value="@string/unsupported_android_version" android:name="android.app.unsupported_android_version"/>            
+            <meta-data android:value="@string/unsupported_android_version" android:name="android.app.unsupported_android_version"/>
+            <meta-data android:name="android.app.lib_name" android:value="SpeedLimitService"/>
         </service>
     </application>
 
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.WRITE_SETTINGS"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
 </manifest>

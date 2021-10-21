@@ -1,0 +1,8 @@
+#include "servicemessenger.rep.h"
+
+class ServiceMessenger {
+    SIGNAL(satellitesUpdated(const QList<QGeoSatelliteInfo> &satellites));
+    SIGNAL(positionUpdated(const QGeoPositionInfo &posInfo));
+}
+
+

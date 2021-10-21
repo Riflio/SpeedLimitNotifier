@@ -1,5 +1,6 @@
 import QtQuick 2.12
 import QtQuick.Window 2.12
+import QtQuick.Layouts 1.12
 
 Window {
     width: 640
@@ -21,7 +22,8 @@ Window {
         }
 
         Text {
-            text: qsTr("Start service")
+            text: "Has satellites:"+appCore.hasSatellites+"\nSpeed:" + appCore.speed.toFixed(1)
+            anchors.centerIn: parent
         }
 
     }
