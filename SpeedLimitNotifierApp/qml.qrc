@@ -1,5 +1,10 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
+        <file>Assets/AppIcon.png</file>
+        <file>Assets/NotifyIcon.png</file>
+        <file>Speedometer.qml</file>
+        <file>Assets/SatellitesIcon.png</file>
+        <file>Switch.qml</file>
     </qresource>
 </RCC>

@@ -1,33 +1,46 @@
 #include "servicecore.h"
-
-
-
 #include <QDebug>
 
-ServiceCore::ServiceCore(QObject *parent) : QObject(parent), _satellitesInUse(0)
+ServiceCore::ServiceCore(QObject *parent) : QObject(parent), _satellitesInUse(0), _speedLimit(100)
 {    
     qDebug()<<"ServiceCore";
 
     _srcNode = new QRemoteObjectHost(QUrl(QStringLiteral("local:replica")), this);
     _serviceMessenger = new ServiceMessenger();
-    _srcNode->enableRemoting(_serviceMessenger);
 
 
-    _t1 = new QTimer(this);
+    _settings = new QSettings("SpeedLimitNotifier.conf", QSettings::IniFormat, this);
 
-    connect(_t1, &QTimer::timeout, this, &ServiceCore::onServiceStarted);
 
-    _t1->setInterval(4000);
-    _t1->setSingleShot(true);
-    _t1->start();
+    _delayInitTimer = new QTimer(this); //-- После инициализации пождём немного, что бы дать всему просраться на Андроиде
+
+    connect(_delayInitTimer, &QTimer::timeout, this, &ServiceCore::onServiceStarted);
 
     _soundOverSpeed = new QSound(":/Assets/Sounds/bell-ringing-04.wav", this);
 
     _soundRepeater = new QTimer(this);
-    _soundRepeater->setSingleShot(false);
-    _soundRepeater->setInterval(3000);
     connect(_soundRepeater, &QTimer::timeout, this, &ServiceCore::soundPlay);
 
+}
+
+/**
+* @brief Подготавливаем всё необходимое
+* @return
+*/
+bool ServiceCore::init()
+{
+     _srcNode->enableRemoting(_serviceMessenger);
+
+     _speedLimit = _settings->value("speedLimit", 100).toDouble();
+
+     _delayInitTimer->setInterval(5000);
+     _delayInitTimer->setSingleShot(true);
+     _delayInitTimer->start();
+
+     _soundRepeater->setSingleShot(false);
+     _soundRepeater->setInterval(3000);
+
+     return true;
 }
 
 /**
@@ -59,7 +72,7 @@ void ServiceCore::onPositionUpdated(const QGeoPositionInfo &posInfo)
 
     double speed = _lastGeoInfo.attribute(QGeoPositionInfo::GroundSpeed) * 3.6;
 
-    if ( _satellitesInUse>1 && speed>40 ) {
+    if ( _satellitesInUse>=3 && _speedLimit>0 && speed>_speedLimit ) {
         soundPlay();
     } else {
         soundStop();
@@ -71,7 +84,6 @@ void ServiceCore::onPositionUpdated(const QGeoPositionInfo &posInfo)
 */
 void ServiceCore::soundPlay()
 {
-    qDebug()<<"soundPlay";
     _soundOverSpeed->play();
     _soundRepeater->start();
 }
@@ -82,6 +94,17 @@ void ServiceCore::soundStop()
     _soundRepeater->stop();
 }
 
+void ServiceCore::onSettingsChanged()
+{
+    qDebug()<<"onSettingsChanged";
+
+    _settings->sync();
+    _speedLimit = _settings->value("speedLimit", 100.0).toDouble();
+
+    qDebug()<<"---speedLimit:"<<_speedLimit;
+
+}
+
 /**
 * @brief Сервис запущен
 */
@@ -89,29 +112,18 @@ void ServiceCore::onServiceStarted()
 {
     qDebug()<<"onServiceStarted";
 
-    QtAndroid::PermissionResult hasPermLocation = QtAndroid::checkPermission(QString("android.permission.ACCESS_FINE_LOCATION"));
-    if( hasPermLocation==QtAndroid::PermissionResult::Denied ) {
-        QtAndroid::PermissionResultMap resultHash = QtAndroid::requestPermissionsSync(QStringList({"android.permission.ACCESS_FINE_LOCATION"}));
-        if (resultHash["android.permission.ACCESS_FINE_LOCATION"] == QtAndroid::PermissionResult::Denied ) {
-            qWarning()<<"Denied GPS access!";
-        }
-    }
-
+    connect(_serviceMessenger, &ServiceMessenger::settingsChanged, this, &ServiceCore::onSettingsChanged);
 
     _geoSat = QGeoSatelliteInfoSource::createDefaultSource(this);
     connect(_geoSat, &QGeoSatelliteInfoSource::satellitesInUseUpdated, this, &ServiceCore::onSatellitesUpdated);
 
     _geoSat->setUpdateInterval(5000);
 
-
-
     _gepPos = QGeoPositionInfoSource::createDefaultSource(this);
 
     connect(_gepPos, QOverload<QGeoPositionInfoSource::Error>::of(&QGeoPositionInfoSource::error), [=](QGeoPositionInfoSource::Error positioningError){ qWarning()<<"GPS error"<<positioningError; });
 
     if ( _gepPos ) {
-
-        qDebug()<<"Supported position methods:";
         int supportedPosMethods = _gepPos->supportedPositioningMethods();
 
         if ( supportedPosMethods!=QGeoPositionInfoSource::NoPositioningMethods ) {
@@ -120,27 +132,23 @@ void ServiceCore::onServiceStarted()
             if ( supportedPosMethods & QGeoPositionInfoSource::NonSatellitePositioningMethods ) { qDebug()<<"---Non satellite"; }
             if ( supportedPosMethods & QGeoPositionInfoSource::AllPositioningMethods ) { qDebug()<<"---Satellite + Non satellite"; }
 
-            qDebug()<<"Go connect";
             connect(_gepPos, &QGeoPositionInfoSource::positionUpdated, this, &ServiceCore::onPositionUpdated);
-
-
-            qDebug()<<"Go start updating. Min interval:"<<_gepPos->minimumUpdateInterval();
 
             _gepPos->setUpdateInterval(1000);
 
             _geoSat->startUpdates();
             _gepPos->startUpdates();
 
-            qDebug()<<"Start GPS updating...";
-
          } else {
-             qDebug()<<"--- has no supported methods"<<supportedPosMethods;
+             emit _serviceMessenger->serviceErrored(ServiceErrors::SE_NO_GPS_DEVICES);
+            return;
          }
-    } else { //TODO: Error to UI
-         qWarning()<<"Unable access to GPS component.";
+    } else {
+        emit _serviceMessenger->serviceErrored(ServiceErrors::SE_NO_GPS_ACCESS);
+        return;
      }
 
-
+    emit _serviceMessenger->serviceStarted();
 
 }
 

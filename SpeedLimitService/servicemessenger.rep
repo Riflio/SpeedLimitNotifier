@@ -3,6 +3,9 @@
 class ServiceMessenger {
     SIGNAL(satellitesUpdated(const QList<QGeoSatelliteInfo> &satellites));
     SIGNAL(positionUpdated(const QGeoPositionInfo &posInfo));
+    SIGNAL(serviceErrored(int code));
+    SIGNAL(serviceStarted());
+    SLOT(changeSettings());
 }
 
 

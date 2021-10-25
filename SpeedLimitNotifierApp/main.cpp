@@ -15,6 +15,9 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
 
+    AppCore * appCore = new AppCore(nullptr);
+    engine.rootContext()->setContextProperty("appCore", appCore);
+
     const QUrl url(QStringLiteral("qrc:/main.qml"));
 
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated, &app, [url](QObject *obj, const QUrl &objUrl) {
@@ -23,9 +26,7 @@ int main(int argc, char *argv[])
 
     engine.load(url);
 
-    AppCore * appCore = new AppCore(nullptr);
 
-    engine.rootContext()->setContextProperty("appCore", appCore);
 
     return app.exec();
 }

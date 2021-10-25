@@ -8,6 +8,7 @@
 #include <QRemoteObjectHost>
 #include <QTimer>
 #include <QSound>
+#include <QSettings>
 
 #include "servicemessenger.h"
 
@@ -17,6 +18,8 @@ class ServiceCore : public QObject
 public:
     explicit ServiceCore(QObject *parent = nullptr);
 
+    bool init();
+
 signals:
 
 private slots:
@@ -25,12 +28,13 @@ private slots:
     void onPositionUpdated(const QGeoPositionInfo& posInfo);
     void soundPlay();
     void soundStop();
+    void onSettingsChanged();
 
 private:
     QGeoSatelliteInfoSource * _geoSat;
     QGeoPositionInfoSource * _gepPos;
 
-    QTimer * _t1;
+    QTimer * _delayInitTimer;
 
     QRemoteObjectHost * _srcNode;
     ServiceMessenger * _serviceMessenger;
@@ -42,6 +46,10 @@ private:
     QGeoPositionInfo _lastGeoInfo;
 
     int _satellitesInUse;
+
+    double _speedLimit;
+
+    QSettings * _settings;
 };
 
 #endif // SERVICECORE_H

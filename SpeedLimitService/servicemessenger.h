@@ -6,8 +6,15 @@
 
 class ServiceMessenger : public ServiceMessengerSource
 {
+Q_OBJECT
+
+signals:
+    void settingsChanged();
 
 public slots:
+    void changeSettings() override {
+        emit settingsChanged();
+    }
 
 };
 

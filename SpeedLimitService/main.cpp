@@ -11,8 +11,8 @@ int main(int argc, char *argv[])
 
     qWarning()<<"SpeedLimitService started!";
 
-
     ServiceCore * serviceCore = new ServiceCore(nullptr);
+    serviceCore->init();
 
     return app.exec();
 }
