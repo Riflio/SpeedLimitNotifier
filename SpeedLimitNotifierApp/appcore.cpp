@@ -11,7 +11,7 @@
 AppCore::AppCore(QObject *parent):
     QObject(parent), _speed(0.0), _satellitesCount(-1), _limit(100),
     _enabled(false), _lastErrorCode(ServiceErrors::SE_NONE), _lastErrorText(""),
-    _notifySignalType(1), _notifySignal(nullptr)
+    _notifySignalType(1), _notifySignal(nullptr), _autoload(false)
 {
     _repNode.connectToNode(QUrl(QStringLiteral("local:replica")));
     _messenger = QSharedPointer<ServiceMessengerReplica>(_repNode.acquire<ServiceMessengerReplica>());
@@ -35,6 +35,7 @@ AppCore::AppCore(QObject *parent):
     setLimit(_settings->value("speedLimit", 100.0).toDouble());
     setEnabled(_settings->value("serviceEnabled", false).toBool());
     setNotifySignalType(_settings->value("notifySignalType", 1).toInt());
+    setAutoload(_settings->value("autoload", true).toBool());
 }
 
 //--GETTERS-------------------------------------------------------------------------
@@ -68,6 +69,12 @@ int AppCore::notifySignalType() const
 {
     return _notifySignalType;
 }
+
+bool AppCore::autoload() const
+{
+    return _autoload;
+}
+
 
 //--SETTERS-------------------------------------------------------------------------
 
@@ -161,6 +168,21 @@ void AppCore::setNotifySignalType(int newNotifySignalType)
     emit notifySignalTypeChanged();
 }
 
+/**
+* @brief Устанавливаем нужен ли автозапуск приложения при загрузке девайса
+* @param newRunOnBoot
+*/
+void AppCore::setAutoload(bool newAutoload)
+{
+    if ( _autoload==newAutoload ) { return; }
+    _autoload = newAutoload;
+
+    _settings->setValue("autoload", _autoload);
+    _settings->sync();
+
+    emit autoloadChanged();
+}
+
 //---------------------------------------------------------------------------
 
 /**
@@ -206,5 +228,3 @@ void AppCore::onServiceErrored(int code) //TODO: Вывод сообщения �
     setLastError(code);
     setEnabled(false);
 }
-
-

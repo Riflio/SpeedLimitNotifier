@@ -138,7 +138,7 @@ ApplicationWindow {
                 Switch {
                     id: enableSwitch
                     position: (appCore.enabled)? 1.0 : 0.0
-                    readonly property bool enabled: (enableSwitch.visualPosition!==0.0)
+                    readonly property bool activated: (enableSwitch.visualPosition!==0.0)
                     onPositionChanged: {
                         appCore.enabled = enableSwitch.visualPosition;
                     }
@@ -146,7 +146,7 @@ ApplicationWindow {
                     Connections { //-- На случай, если нельзя включить или состояние изменилось
                         target: appCore
                         onEnabledChanged: {
-                            if ( appCore.enabled!==enableSwitch.enabled ) {
+                            if ( appCore.enabled!==enableSwitch.activated ) {
                                 enableSwitch.position = appCore.enabled;
                             }
                         }
@@ -230,10 +230,25 @@ ApplicationWindow {
                 }
 
                 Button {
-                    text: qsTr("Test")
+                    text: qsTr("Sound test")
                     Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
                     onClicked: {
                         appCore.notifySignalTest();
+                    }
+                }
+
+                Label {
+                    text: qsTr("Autoload:")
+                    Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                }
+
+                Switch {
+                    id: autoloadSwitch
+                    Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
+                    enabled: false
+                    position: (appCore.autoload)? 1.0 : 0.0
+                    onPositionChanged: {
+                        appCore.autoload = autoloadSwitch.visualPosition;
                     }
                 }
 

@@ -16,6 +16,7 @@ class AppCore : public QObject
     Q_PROPERTY(bool enabled READ enabled WRITE setEnabled NOTIFY enabledChanged)
     Q_PROPERTY(QString lastErrorText READ lastErrorText NOTIFY lastErrorChanged)
     Q_PROPERTY(int notifySignalType READ notifySignalType WRITE setNotifySignalType NOTIFY notifySignalTypeChanged)
+    Q_PROPERTY(bool autoload READ autoload WRITE setAutoload NOTIFY autoloadChanged)
 
     Q_ENUMS(ENotifySignalTypes);
 
@@ -47,14 +48,17 @@ public:
     int notifySignalType() const;
     void setNotifySignalType(int newNotifySignalType);
 
+    bool autoload() const;
+    void setAutoload(bool newAutoload);
+
 signals:
     void speedChanged();
     void satellitesCountChanged();
     void limitChanged();
     void enabledChanged();
     void lastErrorChanged();
-
     void notifySignalTypeChanged();
+    void autoloadChanged();
 
 public slots:
     void notifySignalTest();
@@ -76,6 +80,7 @@ private:
     QString _lastErrorText;
     int _notifySignalType;
     QSound * _notifySignal;
+    bool _autoload;
 };
 
 #endif // APPCORE_H
