@@ -5,6 +5,7 @@
         <file>Assets/NotifyIcon.png</file>
         <file>Speedometer.qml</file>
         <file>Assets/SatellitesIcon.png</file>
-        <file>Switch.qml</file>
+        <file>Assets/Menu.svg</file>
+        <file>Assets/Sounds/bell-ringing-04.wav</file>
     </qresource>
 </RCC>

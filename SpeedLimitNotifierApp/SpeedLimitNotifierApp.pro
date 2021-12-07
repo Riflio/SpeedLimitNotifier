@@ -1,5 +1,5 @@
 QT += quick
-QT += androidextras positioning remoteobjects multimedia
+QT += androidextras positioning remoteobjects multimedia quickcontrols2 svg multimedia
 
 
 CONFIG += c++11

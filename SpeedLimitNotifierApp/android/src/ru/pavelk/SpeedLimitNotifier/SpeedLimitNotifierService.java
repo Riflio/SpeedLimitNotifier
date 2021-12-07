@@ -15,18 +15,23 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 
+import android.os.SystemClock;
+import android.media.AudioManager;
+import android.media.ToneGenerator;
+
 
 public class SpeedLimitNotifierService extends QtService
 {
     private static final String TAG = "SpeedLimitService";
-
     public static final String CHANNEL_ID = "SpeedLimitServiceFGChannel";
-
     public static final String ACTION_START_FOREGROUND_SERVICE = "ACTION_START_FOREGROUND_SERVICE";
+
+    private ToneGenerator _toneGenerator;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        _toneGenerator = new ToneGenerator(4, 100);
         Log.i(TAG, "Creating Service");
     }
     
@@ -68,7 +73,7 @@ public class SpeedLimitNotifierService extends QtService
 
     private void startForegroundService()
     {
-        Intent resultIntent = new Intent(this, org.qtproject.qt5.android.bindings.QtActivity.class);
+        Intent resultIntent = new Intent(this, ru.pavelk.SpeedLimitNotifier.MainActivity.class);
         resultIntent.setAction("android.intent.action.MAIN");
         resultIntent.addCategory("android.intent.category.LAUNCHER");
 
@@ -91,6 +96,13 @@ public class SpeedLimitNotifierService extends QtService
                     .build();
 
         startForeground(1142, notification);
+    }
+
+    public void notifySignal()
+    {
+        _toneGenerator.startTone(ToneGenerator.TONE_DTMF_7);
+        SystemClock.sleep(200);
+        _toneGenerator.stopTone();
     }
 
 }

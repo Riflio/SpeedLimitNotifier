@@ -1,7 +1,7 @@
 #include "servicecore.h"
 #include <QDebug>
 
-ServiceCore::ServiceCore(QObject *parent) : QObject(parent), _satellitesInUse(0), _speedLimit(100)
+ServiceCore::ServiceCore(QObject *parent) : QObject(parent), _satellitesInUse(0), _speedLimit(100), _notifySignalType(1)
 {    
     qDebug()<<"ServiceCore";
 
@@ -31,9 +31,7 @@ bool ServiceCore::init()
 {
      _srcNode->enableRemoting(_serviceMessenger);
 
-     _speedLimit = _settings->value("speedLimit", 100).toDouble();
-
-     _delayInitTimer->setInterval(5000);
+     _delayInitTimer->setInterval(10000);
      _delayInitTimer->setSingleShot(true);
      _delayInitTimer->start();
 
@@ -84,13 +82,30 @@ void ServiceCore::onPositionUpdated(const QGeoPositionInfo &posInfo)
 */
 void ServiceCore::soundPlay()
 {
-    _soundOverSpeed->play();
+    if ( _notifySignalType==NST_FILE ) {
+        _soundOverSpeed->play();
+    } else
+    if ( _notifySignalType==NST_TONE ) {
+        QAndroidJniObject service = QtAndroid::androidService();
+        if ( service.isValid() ) {
+            service.callMethod<void>("notifySignal");
+        } else {
+            qWarning()<<"Service activity not valid O_o !";
+            return;
+        }
+    } else {
+        return;
+    }
+
     _soundRepeater->start();
 }
 
 void ServiceCore::soundStop()
 {
-    _soundOverSpeed->stop();
+    if ( _notifySignalType==NST_FILE ) {
+        _soundOverSpeed->stop();
+    }
+
     _soundRepeater->stop();
 }
 
@@ -100,8 +115,7 @@ void ServiceCore::onSettingsChanged()
 
     _settings->sync();
     _speedLimit = _settings->value("speedLimit", 100.0).toDouble();
-
-    qDebug()<<"---speedLimit:"<<_speedLimit;
+    _notifySignalType = _settings->value("notifySignalType", 1).toInt();
 
 }
 
@@ -112,6 +126,7 @@ void ServiceCore::onServiceStarted()
 {
     qDebug()<<"onServiceStarted";
 
+    onSettingsChanged();
     connect(_serviceMessenger, &ServiceMessenger::settingsChanged, this, &ServiceCore::onSettingsChanged);
 
     _geoSat = QGeoSatelliteInfoSource::createDefaultSource(this);

@@ -1,6 +1,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QQuickStyle>
 
 #include "appcore.h"
 
@@ -12,6 +13,8 @@ int main(int argc, char *argv[])
 #endif
 
     QGuiApplication app(argc, argv);
+
+    QQuickStyle::setStyle("Material");
 
     QQmlApplicationEngine engine;
 

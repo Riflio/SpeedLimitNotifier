@@ -18,6 +18,12 @@ class ServiceCore : public QObject
 public:
     explicit ServiceCore(QObject *parent = nullptr);
 
+    enum ENotifySignalTypes {
+        NST_NONE = 0,
+        NST_TONE = 1,
+        NST_FILE = 2
+    };
+
     bool init();
 
 signals:
@@ -40,15 +46,13 @@ private:
     ServiceMessenger * _serviceMessenger;
 
     QTimer * _soundRepeater;
-
     QSound * _soundOverSpeed;
 
     QGeoPositionInfo _lastGeoInfo;
-
     int _satellitesInUse;
 
     double _speedLimit;
-
+    int _notifySignalType;
     QSettings * _settings;
 };
 
